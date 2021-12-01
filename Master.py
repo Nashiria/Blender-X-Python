@@ -49,7 +49,7 @@ def createRandomCubes(cubeSize=(1,1,1),cubeCount=20):
             translations.append((0+x*cubeSize[0]*2,0+y*cubeSize[1]*2,random.randint(-5,5)/10))
             createRectangle(translations[count],cubeSize,"Cube"+str(count)+" Mesh","Cube"+str(count)+" Object")
             count+=1
-def createRandomCubesWithSpaces(cubeSize=(1,1,1),cubeCount=20,minSpace=0,maxSpace=5):
+def createRandomCubesWithSpaces(cubeSize=(1,1,1),cubeCount=20,minSpace=0,maxSpace=1):
     translations=[]
     count=0
     import random
@@ -66,3 +66,21 @@ def createRandomCubesWithSpaces(cubeSize=(1,1,1),cubeCount=20,minSpace=0,maxSpac
     for translation in translations:
         createRectangle(translation, cubeSize, "Cube" + str(count) + " Mesh", "Cube" + str(count) + " Object")
 
+# Create from Source
+
+def createDataFromPNG(source,color,translationXYZ, scaleXYZ):
+    from PIL import Image
+    import numpy as np
+    pim = Image.open(source).convert('RGB')
+    im = np.array(pim)
+    X,Y=np.where(np.all(im == color, axis=2))
+    vertices=[[(scaleXYZ[0]*xCoordinate)+translationXYZ[0],0,0] for xCoordinate in X.tolist()]
+    index=0
+    for yCoordinate in Y:
+        vertices[index][1]=(scaleXYZ[1]*yCoordinate)+translationXYZ[1]
+        index+=1
+    return (vertices,[],[tuple([x for x in range(vertices)])])
+def createObjectFromPNG(meshName="Test Mesh",objectName="Test Mesh",translationXYZ=[0,0,0],scaleXYZ=[1,1,1],source="test.png",color=[0,0,0]):
+    collectObject(createObject(createMesh(meshName, createDataFromPNG(source,color,translationXYZ, scaleXYZ)), objectName))
+
+createObjectFromPNG(source="test.png",color=[179,172,36])
